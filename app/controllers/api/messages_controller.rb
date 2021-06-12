@@ -1,6 +1,7 @@
 module Api
   class MessagesController < ApplicationController
     before_action :authorize!, except: %i[public]
+    before_action :can_read_admin_messages!, only: %i[admin]
 
     def public
       message = 'The API doesn\'t require an access token to share this message.'

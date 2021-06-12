@@ -9,6 +9,10 @@ class ApplicationController < ActionController::API
     @token ||= result
   end
 
+  def can_read_admin_messages!
+    check_permissions(@token, 'read:admin-messages')
+  end
+
   private
 
   def verify(token)
@@ -22,5 +26,14 @@ class ApplicationController < ActionController::API
     return headers['Authorization'].split.last if headers['Authorization'].present?
 
     nil
+  end
+
+  def check_permissions(token, permission)
+    permissions = token['permissions']&.split || []
+
+    unless permissions.include?(permission)
+      render json: { message: 'Access is denied' }.to_json,
+             status: :unauthorized
+    end
   end
 end
