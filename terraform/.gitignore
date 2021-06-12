@@ -1,0 +1,5 @@
+.env
+files/
+.vagrant/
+.terraform/
+terraform.tfstate*
