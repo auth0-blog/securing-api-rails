@@ -68,6 +68,12 @@ export TF_VAR_auth0_client_secret=secret-of-the-management-api
 
 Then you can run `./go apply` and confirm by writing `yes` when asked.
 
+Note that in order to have a valid user to test the permissions, you have to apply in two phases. First apply the code, normally, then you need to give your management API access to the test database here:
+
+> Authentication > Database > Username-Password-Authentication > Applications
+
+Then uncomment the `resource "auth0_user" "user"` block in the [roles.tf](./terraform/roles.tf) file.
+
 ### Connect with Auth0
 
 To ensure that the application can authenticate properly with _Auth0_ when running `./go run`, you need to define two variables:
@@ -75,7 +81,6 @@ To ensure that the application can authenticate properly with _Auth0_ when runni
 ```bash
 export AUTH0_DOMAIN=yourTenant # Align it with TF_VAR_auth0_domain
 export AUTH0_AUDIENCE=targetAudience.auth0.com # Align it with TF_VAR_audience
-```
 
 ## Test the Protected Endpoints
 
@@ -98,6 +103,33 @@ curl --request GET \
 Replace the value of `http://localhost:6060/api/messages/protected` with your protected API endpoint path (you can find all the available API endpoints in the next section) and execute the command. You should receive back a successful response from the server.
 
 You can try out any of our full stack demos to see the client-server Auth0 workflow in action using your preferred front-end and back-end technologies.
+
+## Test the Admin Endpoint
+
+The `GET /api/messages/admin` endpoint requires the access token to contain the `read:admin-messages` permission. The best way to simulate that client-server secured request is to use any of the Hello World client demo apps to log in as a user that has that permission.
+
+Applying the `terraform` code prints the client id and the secret for the test application. Additionally, you need to pass your own tenant to request a valid token. You can request a token with this snippet.
+
+```bash
+export CLIENT_ID=your-client-id
+export CLIENT_SECRET=your-client-secret
+export TENANT=yourTenant
+export AUDIENCE=targetAudience.auth0.com
+
+curl --request POST \
+  --url https://${TENANT}.eu.auth0.com/oauth/token \
+  --header 'content-type: application/x-www-form-urlencoded' \
+  --data grant_type=http://auth0.com/oauth/grant-type/password-realm \
+  --data username=admin@admin.com \
+  --data password=admin \
+  --data audience=${AUDIENCE} \
+  --data scope=read:admin-messages \
+  --data realm=Username-Password-Authentication \
+  --data client_id=${CLIENT_ID} \
+  --data client_secret=${CLIENT_SECRET}
+```
+
+This token makes the `/api/messages/admin` endpoint accessible.
 
 ## API Endpoints
 
