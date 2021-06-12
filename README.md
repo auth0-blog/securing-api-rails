@@ -2,13 +2,11 @@
 
 This sample uses [the ruby-jwt library](https://github.com/jwt/ruby-jwt) to implement the following security tasks:
 
-The `add-authorization` branch offers a working API server that exposes a public endpoint along with two protected endpoints. Each endpoint returns a different type of message: public, protected, and admin.
+The `add-rbac` branch offers a working API server that exposes a public endpoint along with two protected endpoints. Each endpoint returns a different type of message: public, protected, and admin.
 
 The `GET /api/messages/protected` and `GET /api/messages/admin` endpoints are protected against unauthorized access. Any requests that contain a valid access token in their authorization header can access the protected and admin data.
 
-However, you should require that only access tokens that contain a `read:admin-messages` permission can access the admin data, which is referred to as [Role-Based Access Control (RBAC)](https://auth0.com/docs/authorization/rbac/).
-
-[Check out the `add-rbac` branch]() to see authorization and Role-Based Access Control (RBAC) in action using Auth0.
+Additionally, the `GET /api/messages/admin` endpoint requires the access tokens to contain a `read:admin-messages` permission in order to access the admin data, which is referred to as [Role-Based Access Control (RBAC)](https://auth0.com/docs/authorization/rbac/).
 
 ## Get Started
 
@@ -143,7 +141,7 @@ Status: 200 OK
 
 ### 🔐 Get admin message
 
-> You need to protect this endpoint using Role-Based Access Control (RBAC).
+> Requires the user to have the `read:admin-messages` permission.
 
 ```bash
 GET /api/messages/admin
@@ -160,7 +158,7 @@ Status: 200 OK
   "message": "The API successfully recognized you as an admin."
 }
 ```
-
+  
 ## Error Handling
 
 ### 400s errors
