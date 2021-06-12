@@ -18,6 +18,8 @@ describe Api::MessagesController, type: :controller do
     subject { get :protected, params: { format: :json } }
 
     it 'returns an accepted answer for the protected endpoint' do
+      authorize! 'validToken'
+
       subject
 
       expect(response).to be_ok
@@ -31,6 +33,8 @@ describe Api::MessagesController, type: :controller do
     subject { get :admin, params: { format: :json } }
 
     it 'returns an accepted answer for the admin endpoint' do
+      authorize! 'validWithPermissionsToken'
+
       subject
 
       expect(response).to be_ok
