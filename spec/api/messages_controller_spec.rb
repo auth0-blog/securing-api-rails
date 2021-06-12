@@ -17,6 +17,35 @@ describe Api::MessagesController, type: :controller do
   describe '#protected' do
     subject { get :protected, params: { format: :json } }
 
+    it 'returns error for the protected endpoint if there is no token' do
+      can_authenticate
+
+      subject
+
+      expect(response).to be_unauthorized
+
+      message = 'Nil JSON web token'
+      expect(json_response!).to include('message' => message)
+    end
+
+    it 'returns error for the protected endpoint if the token is expired' do
+      authorize! 'expiredToken'
+
+      subject
+
+      expect(response).to be_unauthorized
+      expect(json_response!['message']).to include('Signature has expired')
+    end
+
+    it 'returns error for the protected endpoint if the token has the wrong issuer' do
+      authorize! 'wrongIssuerToken'
+
+      subject
+
+      expect(response).to be_unauthorized
+      expect(json_response!['message']).to include('Invalid issuer')
+    end
+
     it 'returns an accepted answer for the protected endpoint' do
       authorize! 'validToken'
 

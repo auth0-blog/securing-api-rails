@@ -4,7 +4,7 @@ class ApplicationController < ActionController::API
   def authorize!
     valid, result = verify(raw_token(request.headers))
 
-    head :unauthorized unless valid
+    render json: { message: result }.to_json, status: :unauthorized unless valid
 
     @token ||= result
   end
