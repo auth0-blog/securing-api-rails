@@ -6,18 +6,24 @@ class JsonWebToken
     def verify(token)
       JWT.decode(token, nil,
                  true, # Verify the signature of this token
-                 algorithm: 'RS256',
+                 algorithm: algorithm,
                  iss: Rails.application.config.x.auth0.issuerUri,
-                 verify_iss: true,
-                 aud: Rails.application.config.x.auth0.audience,
-                 verify_aud: true) do |header|
-        jwks_hash[header['kid']]
+                 verify_iss: true) do |header|
+        key(header)
       end
+    end
+
+    def algorithm
+      'RS256'
+    end
+
+    def key(header)
+      jwks_hash[header['kid']]
     end
 
     def jwks_hash
       issuer = Rails.application.config.x.auth0.issuerUri
-      jwks_raw = Net::HTTP.get URI("#{issuer}/.well-known/jwks.json")
+      jwks_raw = Net::HTTP.get URI("#{issuer}.well-known/jwks.json")
       jwks_keys = Array(JSON.parse(jwks_raw)['keys'])
       jwks_keys.map do |k|
         [
