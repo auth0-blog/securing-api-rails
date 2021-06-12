@@ -46,6 +46,15 @@ describe Api::MessagesController, type: :controller do
       expect(json_response!['message']).to include('Invalid issuer')
     end
 
+    it 'returns error for the protected endpoint if the token has the wrong audience' do
+      authorize! 'wrongAudienceToken'
+
+      subject
+
+      expect(response).to be_unauthorized
+      expect(json_response!['message']).to include('Invalid audience')
+    end
+
     it 'returns an accepted answer for the protected endpoint' do
       authorize! 'validToken'
 
