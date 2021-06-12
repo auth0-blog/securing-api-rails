@@ -1,0 +1,6 @@
+development:
+  issuerUri: <%= ENV["AUTH0_DOMAIN"] %>
+  audience: <%= ENV["AUTH0_AUDIENCE"] %>
+test:
+  issuerUri: https://yourTenant.eu.auth0.com
+  audience: targetAudience.auth0.com
