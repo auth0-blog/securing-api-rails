@@ -1,12 +1,12 @@
 # Hello World API: Ruby on Rails Sample
 
-You can use this sample project to learn how to secure a simple [Ruby on Rails](https://rubyonrails.org/) API server using Auth0.
+This sample uses [the ruby-jwt library](https://github.com/jwt/ruby-jwt) to implement the following security tasks:
 
-The `starter` branch offers a working API server that exposes three public endpoints. Each endpoint returns a different type of message: public, protected, and admin.
+The `add-authorization` branch offers a working API server that exposes a public endpoint along with two protected endpoints. Each endpoint returns a different type of message: public, protected, and admin.
 
-The goal is to use Auth0 to only allow requests that contain a valid access token in their authorization header to access the protected and admin data. Additionally, only access tokens that contain a `read:admin-messages` permission should access the admin data, which is referred to as [Role-Based Access Control (RBAC)](https://auth0.com/docs/authorization/rbac/).
+The `GET /api/messages/protected` and `GET /api/messages/admin` endpoints are protected against unauthorized access. Any requests that contain a valid access token in their authorization header can access the protected and admin data.
 
-[Check out the `add-authorization` branch]() to see authorization in action using Auth0.
+However, you should require that only access tokens that contain a `read:admin-messages` permission can access the admin data, which is referred to as [Role-Based Access Control (RBAC)](https://auth0.com/docs/authorization/rbac/).
 
 [Check out the `add-rbac` branch]() to see authorization and Role-Based Access Control (RBAC) in action using Auth0.
 
@@ -40,8 +40,6 @@ Use:
 
 ## API Endpoints
 
-The API server defines the following endpoints:
-
 ### 🔓 Get public message
 
 ```bash
@@ -60,9 +58,9 @@ Status: 200 OK
 }
 ```
 
-### 🔓 Get protected message
+> 🔐 Protected Endpoints: These endpoints require the request to include an access token issued by Auth0 in the authorization header.
 
-> You need to protect this endpoint using Auth0.
+### 🔐 Get protected message
 
 ```bash
 GET /api/messages/protected
@@ -80,9 +78,9 @@ Status: 200 OK
 }
 ```
 
-### 🔓 Get admin message
+### 🔐 Get admin message
 
-> You need to protect this endpoint using Auth0 and Role-Based Access Control (RBAC).
+> You need to protect this endpoint using Role-Based Access Control (RBAC).
 
 ```bash
 GET /api/messages/admin
