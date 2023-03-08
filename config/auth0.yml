@@ -1,6 +1,3 @@
 development:
-  issuerUri: <%= ENV["AUTH0_DOMAIN"] %>
-  audience: <%= ENV["AUTH0_AUDIENCE"] %>
-test:
-  issuerUri: https://yourTenant.eu.auth0.com/
-  audience: targetAudience.auth0.com
+  domain: <%= ENV.fetch('AUTH0_DOMAIN') %>
+  audience: <%= ENV.fetch('AUTH0_AUDIENCE') %>

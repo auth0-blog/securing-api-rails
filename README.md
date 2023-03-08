@@ -18,6 +18,8 @@ You need to have `ruby` installed. I recommend using [rbenv](https://github.com/
 brew install rbenv
 ```
 
+Note that before using `rbenv`, you need to initialize it so that it's used instead of the system version. See [here](https://github.com/rbenv/rbenv#installation) for more details.
+
 If you're in the folder of the project, running `rbenv install` installs the right version of ruby as specified by the [.ruby-version](./.ruby-version). Then, install the dependencies by running `bundle install`.
 
 There's a `go` script that you can use to execute the different tasks.

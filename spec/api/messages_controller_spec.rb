@@ -17,53 +17,23 @@ describe Api::MessagesController, type: :controller do
   describe '#protected' do
     subject { get :protected, params: { format: :json } }
 
-    it 'returns error for the protected endpoint if there is no token' do
-      can_authenticate
-
-      subject
-
-      expect(response).to be_unauthorized
-
-      message = 'Nil JSON web token'
-      expect(json_response!).to include('message' => message)
+    context 'with error' do
+      include_examples 'invalid token', 'Invalid audience'
+      include_examples 'invalid token', 'Nil JSON web token'
+      include_examples 'invalid token', 'Signature has expired'
+      include_examples 'invalid token', 'Invalid issuer'
     end
 
-    it 'returns error for the protected endpoint if the token is expired' do
-      authorize! 'expiredToken'
+    context 'valid' do
+      it 'returns an accepted answer for the protected endpoint' do
+        allow(JsonWebToken).to receive(:verify).and_return(double(decoded_token: :valid, error: nil))
 
-      subject
+        subject
+        expect(response).to be_ok
 
-      expect(response).to be_unauthorized
-      expect(json_response!['message']).to include('Signature has expired')
-    end
-
-    it 'returns error for the protected endpoint if the token has the wrong issuer' do
-      authorize! 'wrongIssuerToken'
-
-      subject
-
-      expect(response).to be_unauthorized
-      expect(json_response!['message']).to include('Invalid issuer')
-    end
-
-    it 'returns error for the protected endpoint if the token has the wrong audience' do
-      authorize! 'wrongAudienceToken'
-
-      subject
-
-      expect(response).to be_unauthorized
-      expect(json_response!['message']).to include('Invalid audience')
-    end
-
-    it 'returns an accepted answer for the protected endpoint' do
-      authorize! 'validToken'
-
-      subject
-
-      expect(response).to be_ok
-
-      message = 'The API successfully validated your access token.'
-      expect(json_response!).to include('message' => message)
+        message = 'The API successfully validated your access token.'
+        expect(json_response!).to include('message' => message)
+      end
     end
   end
 
@@ -71,7 +41,7 @@ describe Api::MessagesController, type: :controller do
     subject { get :admin, params: { format: :json } }
 
     it 'returns an accepted answer for the admin endpoint' do
-      authorize! 'validWithPermissionsToken'
+      allow(JsonWebToken).to receive(:verify).and_return(double(decoded_token: :valid, error: nil))
 
       subject
 

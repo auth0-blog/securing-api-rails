@@ -3,36 +3,36 @@ require 'net/http'
 
 class JsonWebToken
   class << self
+    Error = Struct.new(:message, :status)
+    Response = Struct.new(:decoded_token, :error)
+
+    def domain_url
+      "https://#{Rails.configuration.auth0.domain}/"
+    end
+
     def verify(token)
-      JWT.decode(token, nil,
-                 true, # Verify the signature of this token
-                 algorithm: algorithm,
-                 iss: Rails.application.config.x.auth0.issuerUri,
-                 verify_iss: true,
-                 aud: Rails.application.config.x.auth0.audience,
-                 verify_aud: true) do |header|
-        key(header)
+      jwks_uri = URI("#{domain_url}.well-known/jwks.json")
+      jwks_response = Net::HTTP.get_response jwks_uri
+
+      unless jwks_response.is_a? Net::HTTPSuccess
+        error = Error.new('Unable to verify credentials', :internal_server_error)
+        return Response.new(nil, error)
       end
-    end
 
-    def algorithm
-      'RS256'
-    end
+      jwks_hash = JSON.parse(jwks_response.body).deep_symbolize_keys
 
-    def key(header)
-      jwks_hash[header['kid']]
-    end
-
-    def jwks_hash
-      issuer = Rails.application.config.x.auth0.issuerUri
-      jwks_raw = Net::HTTP.get URI("#{issuer}.well-known/jwks.json")
-      jwks_keys = Array(JSON.parse(jwks_raw)['keys'])
-      jwks_keys.map do |k|
-        [
-          k['kid'],
-          OpenSSL::X509::Certificate.new(Base64.decode64(k['x5c'].first)).public_key
-        ]
-      end.to_h
+      decoded_token = JWT.decode(token, nil, true, {
+                                   algorithm: 'RS256',
+                                   iss: domain_url,
+                                   verify_iss: true,
+                                   aud: Rails.configuration.auth0.audience.to_s,
+                                   verify_aud: true,
+                                   jwks: { keys: jwks_hash[:keys] }
+                                 })
+      Response.new(decoded_token, nil)
+    rescue JWT::VerificationError, JWT::DecodeError => e
+      error = Error.new(e.message, :unauthorized)
+      Response.new(nil, error)
     end
   end
 end
