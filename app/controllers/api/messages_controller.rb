@@ -1,7 +1,7 @@
 module Api
   class MessagesController < ApplicationController
     before_action :authorize!, except: %i[public]
-    
+
     def public
       message = 'The API doesn\'t require an access token to share this message.'
       render json: { message: message }
