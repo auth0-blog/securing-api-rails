@@ -83,6 +83,7 @@ To ensure that the application can authenticate properly with _Auth0_ when runni
 ```bash
 export AUTH0_DOMAIN=yourTenant # Align it with TF_VAR_auth0_domain
 export AUTH0_AUDIENCE=targetAudience.auth0.com # Align it with TF_VAR_audience
+```
 
 ## Test the Protected Endpoints
 

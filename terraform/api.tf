@@ -22,7 +22,6 @@ resource "auth0_resource_server" "jwt-validation" {
   token_lifetime_for_web = 7200
 
   skip_consent_for_verifiable_first_party_clients = true
-
   token_dialect = "access_token_authz"
 
   scopes {
