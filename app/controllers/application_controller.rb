@@ -2,11 +2,14 @@ require 'json_web_token'
 
 class ApplicationController < ActionController::API
   def authorize!
-    valid, result = verify(raw_token(request.headers))
+    token = raw_token(request.headers)
+    validation_response = JsonWebToken.verify(token)
 
-    render json: { message: result }.to_json, status: :unauthorized unless valid
+    @token ||= validation_response.decoded_token
 
-    @token ||= result
+    return unless (error = validation_response.error)
+
+    render json: { message: error.message }, status: error.status
   end
 
   def can_read_admin_messages!
@@ -15,17 +18,8 @@ class ApplicationController < ActionController::API
 
   private
 
-  def verify(token)
-    payload, = JsonWebToken.verify(token)
-    [true, payload]
-  rescue JWT::DecodeError => e
-    [false, e]
-  end
-
   def raw_token(headers)
     return headers['Authorization'].split.last if headers['Authorization'].present?
-
-    nil
   end
 
   def check_permissions(token, permission)

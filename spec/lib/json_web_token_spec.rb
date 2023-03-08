@@ -17,17 +17,22 @@ describe JsonWebToken do
   end
   # rubocop:enable Layout/LineLength
 
+  let(:jwks_response) { Net::HTTPSuccess.new(1.0, '200', body: jwks_raw) }
   describe '.verify' do
     before do
-      allow(Net::HTTP).to receive(:get).and_return(jwks_raw)
+      allow(Net::HTTP).to receive(:get_response).and_return(jwks_response)
+      allow(jwks_response).to receive(:body).and_return(jwks_raw)
+
+      allow(Rails.configuration).to receive_message_chain('auth0.domain').and_return('AUTH0_DOMAIN_STUB')
+      allow(Rails.configuration).to receive_message_chain('auth0.audience').and_return('AUTH0_AUDIENCE_STUB')
     end
 
-    it 'raises exception if the token is incorrect' do
-      expect { subject.verify('') }.to raise_exception(JWT::DecodeError)
+    it 'shows and error if the token is incorrect' do
+      expect(subject.verify('').error.message).to eq("Not enough or too many segments")
     end
 
-    it 'raises exception if the token is expired' do
-      expect { subject.verify(token) }.to raise_exception(JWT::DecodeError)
+    it 'shows and error if the token is expired' do
+      expect(subject.verify(token).error.message).to eq("Signature has expired")
     end
   end
 end
